@@ -1,0 +1,8 @@
+1. npm install nodemon
+2. chalk
+3. blessed
+4. figlet
+5. cli-spinners
+6. gradient-string
+7. terminal-kit
+8. readline
