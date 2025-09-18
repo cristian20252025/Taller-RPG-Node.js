@@ -1,12 +1,16 @@
 const inquirer = require('inquirer');
-const { mostrarBarraVida, colores, mostrarResultadoAtaque } = require('../utils/battleUtils');
+const { mostrarResultadoAtaque } = require('../utils/battleUtils');
+const { mostrarBarraVida } = require('../utils/displayUtils');
 const { crearEnemigoAleatorio } = require('../utils/enemyFactory');
 const { mostrarMenuBatalla, pausa } = require('../utils/menuUtils');
 const Pocion = require('../models/Pocion');
+const Inmunidad = require('../models/Inmunidad');
+const inputHandler = require('../utils/inputHandler');
+const colores = require('../utils/colors');
 
 class BattleService {
     static async iniciarBatalla(jugador) {
-        // Crear enemigo basado en el nivel del jugador
+        // Crear enemigo aleatorio según nivel
         const enemigo = crearEnemigoAleatorio(jugador.nivel);
 
         console.log(colores.red(`\n¡${enemigo.nombre} aparece!`));
@@ -15,23 +19,25 @@ class BattleService {
         let turnoJugador = true;
         let batallaActiva = true;
 
-        while (batallaActiva && jugador.vida > 0 && enemigo.vida > 0) {
+        while (batallaActiva) {
+            console.clear();
+            console.log(mostrarBarraVida(jugador));
+            console.log(mostrarBarraVida(enemigo));
+
             if (turnoJugador) {
-                // Turno del jugador
-                console.log(colores.blue(`\n=== TURNO DE ${jugador.nombre.toUpperCase()} ===`));
-                console.log(mostrarBarraVida(jugador));
-                console.log(mostrarBarraVida(enemigo));
+                const { opcion } = await mostrarMenuBatalla(jugador);
+                let accionValida = false;
 
-                const accion = await mostrarMenuBatalla(jugador);
-
-                switch (accion.opcion) {
-                    case 'atacar':
+                switch (opcion) {
+                    case '1':
+                        // Atacar
                         const daño = jugador.atacar(enemigo);
                         mostrarResultadoAtaque(jugador, enemigo, daño);
+                        accionValida = true;
                         break;
-
-                    case 'habilidad_especial':
-                        let dañoHabilidad = 0;
+                    case '2':
+                        // Habilidad especial
+                        let dañoHabilidad;
                         if (jugador.clase === 'Guerrero') {
                             dañoHabilidad = jugador.ataquePoderoso(enemigo);
                         } else if (jugador.clase === 'Mago') {
@@ -39,88 +45,101 @@ class BattleService {
                         } else if (jugador.clase === 'Arquero') {
                             dañoHabilidad = jugador.disparoPreciso(enemigo);
                         }
-
-                        if (dañoHabilidad > 0) {
-                            mostrarResultadoAtaque(jugador, enemigo, dañoHabilidad, true);
+                        mostrarResultadoAtaque(jugador, enemigo, dañoHabilidad, true);
+                        if (dañoHabilidad > 0 || jugador.clase === 'Arquero') {
+                            accionValida = true;
                         }
                         break;
+                    case '3':
+                        // Usar item
+                        console.clear();
+                        console.log(colores.blue(`=== INVENTARIO DE ${jugador.nombre.toUpperCase()} ===`));
+                        
+                        const inventario = jugador.inventario;
 
-                    case 'usar_item':
-                        if (jugador.inventario.length === 0) {
-                            console.log(colores.yellow('No tienes items en tu inventario.'));
-                            turnoJugador = true; // Permite elegir otra acción
-                            continue;
+                        if (inventario.length === 0) {
+                            console.log(colores.yellow('Tu inventario está vacío.'));
+                            await pausa();
+                            break;
                         }
 
-                        const { indiceItem } = await inquirer.prompt([
+                        const itemChoices = inventario.map((item, index) => ({
+                            name: `${index + 1}. ${item.nombre} - ${item.descripcion}`, // <-- Corrección aquí
+                            value: index
+                        }));
+
+                        const { itemIndex } = await inquirer.prompt([
                             {
                                 type: 'list',
-                                name: 'indiceItem',
+                                name: 'itemIndex',
                                 message: 'Selecciona un item para usar:',
-                                choices: jugador.inventario.map((item, i) => ({
-                                    name: `${i + 1}. ${item.nombre} - ${item.descripcion}`,
-                                    value: i
-                                }))
+                                choices: itemChoices
                             }
                         ]);
 
-                        jugador.usarItem(indiceItem);
-                        break;
-
-                    case 'huir':
-                        if (Math.random() < 0.5) {
-                            console.log(colores.green('¡Logras huir de la batalla!'));
-                            batallaActiva = false;
+                        if (jugador.usarItem(itemIndex)) {
+                            console.log(colores.green(`¡Item ${inventario[itemIndex].nombre} usado con éxito!`));
+                            accionValida = true;
                         } else {
-                            console.log(colores.red('¡No logras huir!'));
+                            console.log(colores.yellow('No se pudo usar el item.'));
                         }
+                        await pausa();
                         break;
+                    case '4':
+                        // Huir
+                        console.log(colores.yellow('Huyes de la batalla.'));
+                        return;
+                    default:
+                        console.log(colores.yellow('Opción no válida.'));
+                        await pausa();
+                }
+
+                if (enemigo.vida <= 0) {
+                    batallaActiva = false;
+                } else if (accionValida) {
+                    turnoJugador = false;
                 }
             } else {
                 // Turno del enemigo
-                console.log(colores.red(`\n=== TURNO DE ${enemigo.nombre.toUpperCase()} ===`));
-                console.log(mostrarBarraVida(jugador));
-                console.log(mostrarBarraVida(enemigo));
-
+                console.log(colores.gray(`\nTurno de ${enemigo.nombre}...`));
                 await pausa();
 
                 const daño = enemigo.atacar(jugador);
                 mostrarResultadoAtaque(enemigo, jugador, daño);
-            }
+                await pausa();
 
-            // Cambiar turno si la batalla sigue activa
-            if (batallaActiva) {
-                turnoJugador = !turnoJugador;
+                if (jugador.vida <= 0) {
+                    batallaActiva = false;
+                } else {
+                    turnoJugador = true;
+                }
             }
-
-            await pausa();
         }
 
-        // Resultado de la batalla
+        // --- RESULTADO DE LA BATALLA ---
         if (jugador.vida <= 0) {
-            console.log(colores.red(`\n¡${jugador.nombre} ha sido derrotado!`));
+            console.log(colores.red(`\n💀 ¡${jugador.nombre} ha sido derrotado!`));
             console.log(colores.yellow('Regresas al punto de partida...'));
-            jugador.vida = jugador.vidaMaxima; // Restaurar vida
+            jugador.vida = jugador.vidaMaxima; // Revivir con vida completa
 
             if (jugador.clase === 'Mago') {
-                jugador.descansar(); // Restaurar mana
+                jugador.descansar(); // Restaurar maná
             }
         } else if (enemigo.vida <= 0) {
-            console.log(colores.green(`\n¡${enemigo.nombre} ha sido derrotado!`));
+            console.log(colores.green(`\n🏆 ¡${enemigo.nombre} ha sido derrotado!`));
 
-            // Otorgar experiencia
+            // Ganar experiencia
             const expGanada = enemigo.experienciaOtorgada;
             jugador.ganarExperiencia(expGanada);
-            console.log(colores.yellow(`¡Ganas ${expGanada} puntos de experiencia!`));
+            console.log(colores.yellow(`✨ Ganas ${expGanada} puntos de experiencia.`));
 
-            // Posible drop de items
+            // Posible drop de ítem
             if (Math.random() < enemigo.probabilidadDrop) {
                 const pocion = new Pocion('Poción de Vida', 50);
                 jugador.agregarItem(pocion);
-                console.log(colores.green(`¡${enemigo.nombre} soltó una ${pocion.nombre}!`));
+                console.log(colores.green(`🎁 ${enemigo.nombre} soltó una ${pocion.nombre}. ¡La agregas a tu inventario!`));
             }
         }
-
         await pausa();
     }
 }

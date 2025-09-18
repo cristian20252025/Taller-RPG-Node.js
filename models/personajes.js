@@ -13,6 +13,7 @@ class Personaje {
     #defensa;
     #inventario;
     #habilidades;
+    #inmunidad; // <-- Nueva propiedad
 
     constructor(nombre, clase, vida, ataque, defensa) {
         this.#id = randomUUID();
@@ -27,6 +28,7 @@ class Personaje {
         this.#defensa = defensa;
         this.#inventario = [];
         this.#habilidades = [];
+        this.#inmunidad = false; // <-- Inicializar
     }
 
     // Getters
@@ -42,6 +44,7 @@ class Personaje {
     get defensa() { return this.#defensa; }
     get inventario() { return [...this.#inventario]; }
     get habilidades() { return [...this.#habilidades]; }
+    get inmunidad() { return this.#inmunidad; } // <-- Nuevo getter
 
     // Setters
     set vida(valor) {
@@ -55,6 +58,7 @@ class Personaje {
     setDefensa(defensa) { this.#defensa = defensa; }
     setInventario(inventario) { this.#inventario = inventario; }
     setHabilidades(habilidades) { this.#habilidades = habilidades; }
+    setInmunidad(valor) { this.#inmunidad = valor; } // <-- Nuevo setter
 
     // Resto de métodos...
     atacar(objetivo) {
@@ -66,6 +70,11 @@ class Personaje {
     }
 
     recibirDaño(daño) {
+        if (this.#inmunidad) {
+            console.log(`${this.#nombre} es inmune y bloquea el ataque.`);
+            this.#inmunidad = false; // <-- La inmunidad se usa en un solo ataque
+            return;
+        }
         this.vida -= daño;
         return this.vida > 0;
     }
@@ -150,7 +159,6 @@ class Personaje {
                 throw new Error(`Clase desconocida: ${data.clase}`);
         }
 
-        // Usar setters para asignar valores
         personaje.setNivel(data.nivel);
         personaje.setExperiencia(data.experiencia);
         personaje.setExperienciaParaSubir(data.experienciaParaSubir);
@@ -159,12 +167,15 @@ class Personaje {
         personaje.setAtaque(data.ataque);
         personaje.setDefensa(data.defensa);
 
-        // Recuperar items
         if (data.inventario) {
             const Pocion = require('./Pocion');
+            const Inmunidad = require('./Inmunidad');
             const items = data.inventario.map(itemData => {
                 if (itemData.tipo === 'pocion') {
                     return new Pocion(itemData.nombre, itemData.curacion);
+                }
+                if (itemData.tipo === 'inmunidad') {
+                    return new Inmunidad();
                 }
                 return null;
             }).filter(item => item !== null);
@@ -172,7 +183,6 @@ class Personaje {
             personaje.setInventario(items);
         }
 
-        // Recuperar habilidades
         if (data.habilidades) {
             personaje.setHabilidades([...data.habilidades]);
         }

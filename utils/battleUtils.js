@@ -1,4 +1,4 @@
-const  colores  = require('../utils/displayUtils');
+const colores = require('../utils/colors'); // Change this line
 
 function mostrarResultadoAtaque(atacante, objetivo, daño, esHabilidad = false) {
     if (daño > 0) {
@@ -34,3 +34,4 @@ module.exports = {
     mostrarResultadoAtaque,
     calcularExperiencia
 };
+
