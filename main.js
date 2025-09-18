@@ -1,4 +1,5 @@
 const { startGame } = require('./services/GameService');
+const inputHandler = require('./utils/inputHandler');
 
 async function main() {
     try {

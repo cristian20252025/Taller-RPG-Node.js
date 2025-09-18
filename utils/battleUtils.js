@@ -1,4 +1,4 @@
-const { colores } = require('../utils/displayUtils');
+const  colores  = require('../utils/displayUtils');
 
 function mostrarResultadoAtaque(atacante, objetivo, daño, esHabilidad = false) {
     if (daño > 0) {

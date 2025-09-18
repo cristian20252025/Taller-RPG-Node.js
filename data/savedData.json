@@ -1,0 +1,72 @@
+{
+    "personajes": [
+        {
+            "id": "118ace30-5eba-4167-9e0b-dd1e07cc1673",
+            "nombre": "bob",
+            "clase": "Mago",
+            "nivel": 1,
+            "experiencia": 0,
+            "experienciaParaSubir": 100,
+            "vida": 100,
+            "vidaMaxima": 100,
+            "ataque": 10,
+            "defensa": 8,
+            "inventario": [
+                {
+                    "nombre": "Poción de Vida Pequeña",
+                    "descripcion": "Restaura 30 puntos de vida",
+                    "tipo": "pocion",
+                    "consumible": true,
+                    "curacion": 30
+                },
+                {
+                    "nombre": "Poción de Vida Pequeña",
+                    "descripcion": "Restaura 30 puntos de vida",
+                    "tipo": "pocion",
+                    "consumible": true,
+                    "curacion": 30
+                }
+            ],
+            "habilidades": [
+                "Bola de Fuego"
+            ],
+            "mana": 50,
+            "manaMaximo": 50,
+            "inteligencia": 20
+        },
+        {
+            "id": "53f6c4ff-e82c-46fd-bb98-e8fdb1fb6285",
+            "nombre": "lucy",
+            "clase": "Guerrero",
+            "nivel": 1,
+            "experiencia": 0,
+            "experienciaParaSubir": 100,
+            "vida": 150,
+            "vidaMaxima": 150,
+            "ataque": 18,
+            "defensa": 12,
+            "inventario": [
+                {
+                    "nombre": "Poción de Vida Pequeña",
+                    "descripcion": "Restaura 30 puntos de vida",
+                    "tipo": "pocion",
+                    "consumible": true,
+                    "curacion": 30
+                },
+                {
+                    "nombre": "Poción de Vida Pequeña",
+                    "descripcion": "Restaura 30 puntos de vida",
+                    "tipo": "pocion",
+                    "consumible": true,
+                    "curacion": 30
+                }
+            ],
+            "habilidades": [
+                "Ataque Poderoso"
+            ],
+            "fuerza": 15,
+            "ira": 0
+        }
+    ],
+    "ultimaActualizacion": "2025-09-18T13:21:27.391Z"
+}

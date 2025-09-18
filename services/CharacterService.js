@@ -1,12 +1,15 @@
 const fs = require('fs').promises;
 const path = require('path');
-const readline = require('readline');
+const inputHandler = require('../utils/inputHandler');
+const RUTA_ARCHIVO = path.resolve(__dirname, '../data/savedData.json');
 
-// Crear instancia de readline para este módulo
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+async function asegurarDirectorio() {
+    const directorio = path.dirname(RUTA_ARCHIVO);
+    if (!fs.existsSync(directorio)) {
+        await fs.mkdir(directorio, { recursive: true });
+        console.log('\x1b[32mDirectorio creado con éxito!\x1b[0m', directorio);
+    }
+}
 
 class CharacterService {
     static async crearPersonaje() {
@@ -14,8 +17,14 @@ class CharacterService {
             console.clear();
             console.log('\x1b[34m=== CREAR PERSONAJE ===\x1b[0m\n');
             
+            // Usar readline de forma temporal
+            const tempRl = require('readline').createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+
             const nombre = await new Promise((resolveNombre) => {
-                rl.question('¿Cómo se llamará tu personaje? ', resolveNombre);
+                tempRl.question('¿Cómo se llamará tu personaje? ', resolveNombre);
             });
 
             console.log('\nSelecciona la clase:');
@@ -24,11 +33,14 @@ class CharacterService {
             console.log('3. Arquero (Daño consistente, ataques dobles)');
             
             const claseOp = await new Promise((resolveClase) => {
-                rl.question('Opción: ', resolveClase);
+                tempRl.question('Opción: ', resolveClase);
             });
 
+            // CERRAR la instancia temporal inmediatamente
+            tempRl.close();
+
             let personaje;
-            const Guerrero = require('../models/Guerrero');
+            const Guerrero = require('../models/guerreros');
             const Mago = require('../models/Mago');
             const Arquero = require('../models/Arquero');
             const Pocion = require('../models/Pocion');
@@ -48,7 +60,6 @@ class CharacterService {
                     personaje = new Guerrero(nombre);
             }
 
-            // Dar items iniciales
             personaje.agregarItem(new Pocion('Poción de Vida Pequeña', 30));
             personaje.agregarItem(new Pocion('Poción de Vida Pequeña', 30));
 
@@ -57,17 +68,20 @@ class CharacterService {
         });
     }
 
+
     static async cargarPersonajes() {
         try {
-            const dataPath = path.join(__dirname, '../data/savedData.json');
-            const data = await fs.readFile(dataPath, 'utf8');
+            const data = await fs.readFile(RUTA_ARCHIVO, 'utf8');
             const jsonData = JSON.parse(data);
             
-            const Personaje = require('../models/Personaje');
+            console.log('\x1b[36mPersonajes cargados del archivo:\x1b[0m', jsonData.personajes.length);
+            
+            const Personaje = require('../models/personajes');
             return jsonData.personajes.map(p => Personaje.fromJSON(p));
+            
         } catch (error) {
-            // Si el archivo no existe, devolver array vacío
             if (error.code === 'ENOENT') {
+                console.log('\x1b[33mNo se encontró archivo de guardado, empezando desde cero.\x1b[0m');
                 return [];
             }
             console.log('\x1b[31mError cargando personajes:\x1b[0m', error.message);
@@ -75,50 +89,117 @@ class CharacterService {
         }
     }
 
-    static async guardarPersonajes(personajes) {
-        try {
-            const dataPath = path.join(__dirname, '../data');
-            
-            // Asegurarse de que la carpeta existe
-            await fs.mkdir(dataPath, { recursive: true });
-            
-            const data = {
-                personajes: personajes.map(p => p.toJSON()),
-                ultimaActualizacion: new Date().toISOString()
-            };
-            
-            await fs.writeFile(path.join(dataPath, 'savedData.json'), JSON.stringify(data, null, 2));
-        } catch (error) {
-            console.log('\x1b[31mError guardando personajes:\x1b[0m', error.message);
-        }
-    }
-
-    static async seleccionarPersonaje(personajes) {
-        if (personajes.length === 0) return null;
         
+
+static async guardarPersonajes(personajes) {
+    try {
+        console.log('\x1b[36mGuardando personajes...\x1b[0m');
+        
+        // Leer personajes existentes primero
+        let todosLosPersonajes = [];
+        try {
+            const datos = await fs.readFile(RUTA_ARCHIVO, 'utf8');
+            todosLosPersonajes = JSON.parse(datos).personajes || [];
+            console.log('\x1b[36mPersonajes existentes cargados:\x1b[0m', todosLosPersonajes.length);
+        } catch (error) {
+            if (error.code === 'ENOENT') {
+                console.log('\x1b[33mNo existe archivo previo, creando nuevo.\x1b[0m');
+            } else {
+                console.log('\x1b[33mError leyendo archivo, empezando desde cero:\x1b[0m', error.message);
+            }
+        }
+
+        // Convertir los nuevos personajes a JSON
+        const nuevosPersonajesJSON = personajes.map(p => p.toJSON());
+        
+        // Combinar y eliminar duplicados por ID
+        const personajesActualizados = [...todosLosPersonajes];
+        
+        nuevosPersonajesJSON.forEach(nuevoPersonaje => {
+            const indiceExistente = personajesActualizados.findIndex(p => p.id === nuevoPersonaje.id);
+            
+            if (indiceExistente !== -1) {
+                // Reemplazar personaje existente
+                personajesActualizados[indiceExistente] = nuevoPersonaje;
+                console.log('\x1b[33mPersonaje actualizado:\x1b[0m', nuevoPersonaje.nombre);
+            } else {
+                // Agregar nuevo personaje
+                personajesActualizados.push(nuevoPersonaje);
+                console.log('\x1b[32mNuevo personaje agregado:\x1b[0m', nuevoPersonaje.nombre);
+            }
+        });
+
+        // Guardar todo el array actualizado
+        const data = {
+            personajes: personajesActualizados,
+            ultimaActualizacion: new Date().toISOString()
+        };
+        
+        await fs.writeFile(RUTA_ARCHIVO, JSON.stringify(data, null, 4));
+        console.log('\x1b[32m¡Archivo guardado exitosamente! Total personajes:\x1b[0m', personajesActualizados.length);
+        
+    } catch (error) {
+        console.log('\x1b[31mError guardando personajes:\x1b[0m', error.message);
+    }
+}
+    
+static async agregarPersonaje(nuevoPersonaje) {
+    try {
+        console.log('\x1b[36mAgregando nuevo personaje...\x1b[0m');
+        
+        // Leer personajes existentes
+        let data = { personajes: [] };
+        try {
+            const datos = await fs.readFile(RUTA_ARCHIVO, 'utf8');
+            data = JSON.parse(datos);
+            console.log('\x1b[36mPersonajes existentes:\x1b[0m', data.personajes.length);
+        } catch (error) {
+            if (error.code === 'ENOENT') {
+                console.log('\x1b[33mCreando nuevo archivo de guardado.\x1b[0m');
+            }
+        }
+
+        // Agregar el nuevo personaje
+        data.personajes.push(nuevoPersonaje.toJSON());
+        data.ultimaActualizacion = new Date().toISOString();
+        
+        await fs.writeFile(RUTA_ARCHIVO, JSON.stringify(data, null, 4));
+        console.log('\x1b[32m¡Personaje agregado correctamente! Total:\x1b[0m', data.personajes.length);
+        
+    } catch (error) {
+        console.log('\x1b[31mError agregando personaje:\x1b[0m', error.message);
+    }
+}
+
+
+
+static async seleccionarPersonaje(personajes) {
+    if (personajes.length === 0) return null;
+
+    while (true) {
         console.clear();
         console.log('\x1b[34m=== SELECCIONAR PERSONAJE ===\x1b[0m\n');
         
         personajes.forEach((p, i) => {
-            console.log(`\x1b[37m${i + 1}. ${p.nombre} (Nivel ${p.nivel} ${p.clase}) - ${p.vida}/${p.vidaMaxima} HP\x1b[0m`);
+            console.log(`${i + 1}. ${p.nombre} (Nivel ${p.nivel} ${p.clase}) - ${p.vida}/${p.vidaMaxima} HP`);
         });
-        
-        const opcion = await new Promise((resolve) => {
-            rl.question('\nSelecciona un personaje: ', resolve);
-        });
-        
+
+        const opcion = await inputHandler.question('\nSelecciona un personaje (o 0 para volver): ');
         const index = parseInt(opcion) - 1;
-        
-        if (index >= 0 && index < personajes.length) {
+
+        if (opcion === '0') {
+            return null; // volver atrás
+        }
+
+        if (!isNaN(index) && index >= 0 && index < personajes.length) {
             return personajes[index];
         }
-        
+
         console.log('\x1b[33mSelección no válida.\x1b[0m');
-        await new Promise((resolve) => {
-            rl.question('Presiona Enter para continuar...', resolve);
-        });
-        return null;
+        await inputHandler.pause();
     }
+}
+
 }
 
 module.exports = CharacterService;

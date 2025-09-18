@@ -135,7 +135,7 @@ class Personaje {
         let personaje;
         switch (data.clase) {
             case 'Guerrero':
-                const Guerrero = require('./Guerrero');
+                const Guerrero = require('./guerreros');
                 personaje = new Guerrero(data.nombre);
                 break;
             case 'Mago':
@@ -178,6 +178,17 @@ class Personaje {
         }
 
         return personaje;
+    }
+    getInventario() {
+        return [...this.#inventario];
+    }
+    
+    setInventario(inventario) {
+        this.#inventario = inventario;
+    }
+    
+    setHabilidades(habilidades) {
+        this.#habilidades = habilidades;
     }
 }
 
