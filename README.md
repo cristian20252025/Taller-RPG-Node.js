@@ -51,7 +51,7 @@ El reino de Textoria no se construyó por casualidad. Su arquitectura está cuid
 
 Para una mejor comprensión de cómo interactúan las diferentes entidades en el juego, te presentamos un diagrama de la estructura de clases principal. Este esquema visualiza las relaciones y herencias, fundamentales para la lógica del RPG.
 
-![Diagrama de Clases del RPG](utils/Diagrama%20de%20clases.png
+![Diagrama de Clases del RPG](utils/Diagrama%20de%20clases.png)
 
 ---
 
