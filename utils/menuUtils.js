@@ -20,7 +20,7 @@ async function mostrarMenuPrincipal() {
     console.clear();
     console.log('\x1b[34m=== SIMULADOR DE BATALLAS RPG ===\x1b[0m\n');
     
-    const rl = readline.createInterface({
+    const rl = require('readline').createInterface({
         input: process.stdin,
         output: process.stdout
     });
@@ -30,7 +30,8 @@ async function mostrarMenuPrincipal() {
         console.log('2. Ver personajes');
         console.log('3. Gestionar personaje');
         console.log('4. Iniciar batalla');
-        console.log('5. Salir');
+        console.log('5. Eliminar personaje'); // <-- Nueva opción
+        console.log('6. Salir'); // <-- La opción Salir ahora es 6
         
         rl.question('\nSelecciona una opción: ', (opcion) => {
             rl.close();
@@ -44,7 +45,7 @@ async function mostrarMenuPersonaje(personaje) {
     console.clear();
     console.log(`\x1b[34m=== GESTIONANDO: ${personaje.nombre} ===\x1b[0m\n`);
     
-    const rl = readline.createInterface({
+    const rl = require('readline').createInterface({
         input: process.stdin,
         output: process.stdout
     });
@@ -63,7 +64,7 @@ async function mostrarMenuPersonaje(personaje) {
 
 // Función para mostrar menú de batalla
 async function mostrarMenuBatalla(personaje) {
-    const rl = readline.createInterface({
+    const rl = require('readline').createInterface({
         input: process.stdin,
         output: process.stdout
     });

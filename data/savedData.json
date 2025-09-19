@@ -1,13 +1,13 @@
 {
     "personajes": [
         {
-            "id": "118ace30-5eba-4167-9e0b-dd1e07cc1673",
+            "id": "9fd366d6-99ab-449b-a946-52ad6d674200",
             "nombre": "bob",
             "clase": "Mago",
             "nivel": 1,
             "experiencia": 0,
             "experienciaParaSubir": 100,
-            "vida": 100,
+            "vida": 88,
             "vidaMaxima": 100,
             "ataque": 10,
             "defensa": 8,
@@ -35,7 +35,7 @@
             "inteligencia": 20
         },
         {
-            "id": "53f6c4ff-e82c-46fd-bb98-e8fdb1fb6285",
+            "id": "ae2d4e33-b38f-49c5-bebb-a96ac80ff7d6",
             "nombre": "lucy",
             "clase": "Guerrero",
             "nivel": 1,
@@ -66,7 +66,105 @@
             ],
             "fuerza": 15,
             "ira": 0
+        },
+        {
+            "id": "614c282f-ab75-4a14-b7d4-ce80d79f044c",
+            "nombre": "luz",
+            "clase": "Arquero",
+            "nivel": 1,
+            "experiencia": 0,
+            "experienciaParaSubir": 100,
+            "vida": 120,
+            "vidaMaxima": 120,
+            "ataque": 15,
+            "defensa": 10,
+            "inventario": [
+                {
+                    "nombre": "Poción de Vida Pequeña",
+                    "descripcion": "Restaura 30 puntos de vida",
+                    "tipo": "pocion",
+                    "consumible": true,
+                    "curacion": 30
+                },
+                {
+                    "nombre": "Poción de Vida Pequeña",
+                    "descripcion": "Restaura 30 puntos de vida",
+                    "tipo": "pocion",
+                    "consumible": true,
+                    "curacion": 30
+                }
+            ],
+            "habilidades": [
+                "Disparo Preciso"
+            ],
+            "destreza": 15,
+            "precision": 80
+        },
+        {
+            "id": "0684b3f3-11d6-4f84-acfa-4b4126536ec9",
+            "nombre": "pepito",
+            "clase": "Guerrero",
+            "nivel": 1,
+            "experiencia": 0,
+            "experienciaParaSubir": 100,
+            "vida": 148,
+            "vidaMaxima": 150,
+            "ataque": 18,
+            "defensa": 12,
+            "inventario": [
+                {
+                    "nombre": "Poción de Vida Pequeña",
+                    "descripcion": "Restaura 30 puntos de vida",
+                    "tipo": "pocion",
+                    "consumible": true,
+                    "curacion": 30
+                },
+                {
+                    "nombre": "Poción de Vida Pequeña",
+                    "descripcion": "Restaura 30 puntos de vida",
+                    "tipo": "pocion",
+                    "consumible": true,
+                    "curacion": 30
+                }
+            ],
+            "habilidades": [
+                "Ataque Poderoso"
+            ],
+            "fuerza": 15,
+            "ira": 0
+        },
+        {
+            "id": "11fdb1c0-8394-4a54-92d1-2363d30579b5",
+            "nombre": "Thomas ",
+            "clase": "Guerrero",
+            "nivel": 1,
+            "experiencia": 46,
+            "experienciaParaSubir": 100,
+            "vida": 140,
+            "vidaMaxima": 150,
+            "ataque": 18,
+            "defensa": 12,
+            "inventario": [
+                {
+                    "nombre": "Poción de Vida Pequeña",
+                    "descripcion": "Restaura 30 puntos de vida",
+                    "tipo": "pocion",
+                    "consumible": true,
+                    "curacion": 30
+                },
+                {
+                    "nombre": "Poción de Inmunidad",
+                    "descripcion": "Te otorga inmunidad por un solo ataque.",
+                    "tipo": "inmunidad",
+                    "consumible": true
+                }
+            ],
+            "habilidades": [
+                "Ataque Poderoso"
+            ],
+            "fuerza": 15,
+            "ira": 0
         }
     ],
-    "ultimaActualizacion": "2025-09-18T13:21:27.391Z"
+    "ultimaActualizacion": "2025-09-18T21:26:17.196Z"
 }
